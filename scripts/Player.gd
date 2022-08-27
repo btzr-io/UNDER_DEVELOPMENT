@@ -16,19 +16,48 @@ var target_position = null
 var last_clone_instance = null
 var last_clone_position = null
 
+
+var ACTIONS = {
+	MOVE = "MOVE",
+	HIDE = "HIDE",
+	HACK = "HACK",
+}
+
+var glitch_chance = 0
+var max_glitch_range = 50
+var current_action = ACTIONS.MOVE
+
 const INTERACTIVE_STATES = {
 	ACTIVE =  0,
 	INACTIVE = 1,
 }
 
 var interactive_state = INTERACTIVE_STATES.ACTIVE
+var overlapping_bodies = 0
+
 onready var line_connection = get_node("Line_connection")
 
 onready var level = get_tree().current_scene
 
 
 func _ready():
-	pass
+	$Ovelrap.connect("body_exited", self, "handle_body_exit")
+	$Ovelrap.connect("body_entered", self, "handle_body_enter")
+
+func get_glitch_chance():
+	var distance = clamp(line_connection.target_distance, 1, max_glitch_range)
+	var chance =   max_glitch_range * distance / 100
+	if chance > 5:
+		chance = pow(int(chance / 1.8), 2)
+	if chance < 5:
+		chance = 0
+	return clamp(chance, 0, 100)
+	
+func handle_body_enter(overlaping_body):
+	overlapping_bodies += 1
+
+func handle_body_exit(overlaping_body):
+	overlapping_bodies -= 1
 
 func instance_clone():
 	if is_instance_valid(last_clone_instance):
@@ -38,7 +67,8 @@ func instance_clone():
 		level.add_child(last_clone_instance)
 		last_clone_instance.global_transform.origin = global_transform.origin
 		last_clone_position = global_transform.origin
-
+		z_index = 2
+		 
 func get_input():
 	# Detect up/down/left/right keystate and only move when pressed
 	direction = Vector2.ZERO
@@ -57,6 +87,9 @@ func get_input():
 			instance_clone()
 			line_connection.disconnect_target()
 			$Sprite.frame = interactive_state
+			$Camera2D.add_trauma(0.4)
+			$Tooltip.hide()
+	
 			return
 		
 		if not target_position and !is_instance_valid(last_clone_instance):
@@ -67,6 +100,7 @@ func get_input():
 			current_speed = max_speed
 			target_position = global_transform.origin + last_direction * size.x
 			instance_clone()
+			$Tooltip/AnimationPlayer.play("show")
 	
 	if target_position:
 			direction = Vector2.ZERO
@@ -75,6 +109,7 @@ func get_input():
 			var target_distance = floor(global_transform.origin.distance_to(target_position))  / 10
 			if target_distance < 1.0:
 				target_position = null
+				print("ok")
 				return
 				
 			velocity = target_direction * current_speed
@@ -96,3 +131,28 @@ func get_input():
 func _physics_process(_delta):
 	get_input()
 	velocity = move_and_slide(velocity)
+	
+	if interactive_state == INTERACTIVE_STATES.ACTIVE:
+		modulate = Color.white
+
+	if interactive_state == INTERACTIVE_STATES.INACTIVE:
+		glitch_chance = get_glitch_chance()
+		if glitch_chance >= 5:
+			$Tooltip.text = current_action + " + GLITCH " + str(glitch_chance) + "%" 
+		else:
+			$Tooltip.text = current_action 
+			
+		if overlapping_bodies > 0:
+			modulate = Color.red
+			line_connection.modulate = Color.red
+			$Tooltip.text = "LOCKED"
+		elif glitch_chance > 0:
+			modulate = Color.orange
+			line_connection.modulate = Color.orange
+		else:
+			modulate = Color.cyan
+			line_connection.modulate = Color.cyan
+	else:
+		$Sprite.modulate = Color.white
+		line_connection.modulate = Color.white
+

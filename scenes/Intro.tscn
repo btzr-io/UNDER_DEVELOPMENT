@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://assets/fonts/space_mono/SpaceMono-Regular.ttf" type="DynamicFontData" id=2]
 
@@ -10,10 +10,6 @@ font_data = ExtResource( 2 )
 [sub_resource type="DynamicFont" id=3]
 size = 32
 font_data = ExtResource( 2 )
-
-[sub_resource type="Environment" id=1]
-background_mode = 4
-tonemap_mode = 4
 
 [sub_resource type="Animation" id=4]
 length = 0.001
@@ -220,9 +216,6 @@ text = "
 Edgar Allan Poe - 1849
 "
 valign = 1
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 1 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "start"
