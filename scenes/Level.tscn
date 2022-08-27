@@ -1,11 +1,11 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://assets/textures/bg_pattern.jpg" type="Texture" id=1]
-[ext_resource path="res://assets/textures/square.jpg" type="Texture" id=2]
+[ext_resource path="res://scenes/Actors/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://default_env.tres" type="Environment" id=3]
-[ext_resource path="res://scripts/Player.gd" type="Script" id=4]
 [ext_resource path="res://scripts/Debug_stats.gd" type="Script" id=5]
 [ext_resource path="res://assets/fonts/space_mono/SpaceMono-Bold.ttf" type="DynamicFontData" id=6]
+[ext_resource path="res://assets/textures/square.jpg" type="Texture" id=7]
 
 [sub_resource type="DynamicFont" id=3]
 size = 20
@@ -15,13 +15,10 @@ font_data = ExtResource( 6 )
 
 [sub_resource type="CanvasItemMaterial" id=1]
 
-[sub_resource type="RectangleShape2D" id=2]
-extents = Vector2( 32, 32 )
-
 [node name="Level" type="Node2D"]
 
 [node name="Background" type="TextureRect" parent="."]
-modulate = Color( 0.172549, 0.172549, 0.172549, 0.882353 )
+modulate = Color( 0.172549, 0.172549, 0.172549, 0.960784 )
 margin_right = 1920.0
 margin_bottom = 1080.0
 texture = ExtResource( 1 )
@@ -48,20 +45,15 @@ margin_right = 1920.0
 margin_bottom = 1080.0
 color = Color( 0, 0, 0, 1 )
 
-[node name="Player" type="KinematicBody2D" parent="."]
-position = Vector2( 768, 440 )
-script = ExtResource( 4 )
-
-[node name="Camera2D" type="Camera2D" parent="Player"]
-current = true
-smoothing_enabled = true
-
-[node name="Sprite" type="Sprite" parent="Player"]
+[node name="Sprite2" type="Sprite" parent="."]
+modulate = Color( 1, 1, 1, 0.862745 )
+self_modulate = Color( 1, 0.407843, 0.407843, 1 )
 material = SubResource( 1 )
-texture = ExtResource( 2 )
+position = Vector2( 768, 440 )
+texture = ExtResource( 7 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
-shape = SubResource( 2 )
+[node name="Player" parent="." instance=ExtResource( 2 )]
+position = Vector2( 776, 432 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 3 )
