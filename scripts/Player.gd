@@ -12,6 +12,7 @@ var direction = Vector2.ZERO
 var last_direction = Vector2.UP
 var current_speed = 0
 var target_position = null
+var snap_position = null
 var last_clone_instance = null
 var last_clone_position = null
 var last_tooltip_text = ""
@@ -47,8 +48,12 @@ onready var line_connection = get_node("Line_connection")
 onready var level = get_tree().current_scene
 onready var camera = get_tree().root.get_node("Level/Main_camera")
 
+
 func is_overlaping():
 	return overlapping_bodies > 0
+
+func snap_to_position(new_position):
+	snap_position = new_position
 
 func _ready():
 	$Ovelrap.connect("body_exited", self, "handle_body_exit")
@@ -62,7 +67,7 @@ func _ready():
 
 func handle_animation_finish(animation_name):
 	if animation_name == "show":
-		is_editing = $Tooltip/AnimationPlayer.current_animation_position > 0
+		is_editing = true
 			
 func exit_edit_mode():
 	if is_overlaping():
@@ -82,8 +87,9 @@ func exit_edit_mode():
 		instance_clone()
 		line_connection.disconnect_target()
 		camera.add_trauma(0.4)
-		$Tooltip/AnimationPlayer.play_backwards("show")
+		$Tooltip.hide()
 		$CollisionShape2D.disabled = false
+		is_editing = false
 
 func enter_edit_mode():
 	if not target_position and !is_instance_valid(last_clone_instance):
@@ -112,6 +118,7 @@ func handle_body_enter(overlaping_body):
 	if overlaping_body.is_in_group("EDITABLE") and last_clone_instance != overlaping_body:
 		selected_target = overlaping_body
 		current_action = ACTIONS.EDIT
+		snap_to_position(selected_target.global_transform.origin)
 	else:
 		overlapping_bodies += 1
 
@@ -122,6 +129,7 @@ func handle_body_exit(overlaping_body):
 		if overlaping_body == selected_target:
 			selected_target = null
 			current_action = ACTIONS.MOVE
+			snap_position = null
 	else:
 		overlapping_bodies -= 1
 
@@ -153,29 +161,6 @@ func get_input():
 			enter_edit_mode()
 		elif is_editing:
 			exit_edit_mode()
-	
-	if target_position:
-			direction = Vector2.ZERO
-			current_speed =  lerp(current_speed, max_speed * 2, 0.8)
-			var target_direction = global_transform.origin.direction_to(target_position).normalized()
-			var target_distance = floor(global_transform.origin.distance_to(target_position))  / 10
-			if target_distance < 1.0:
-				target_position = null
-				return
-				
-			velocity = target_direction * current_speed
-			
-	
-	if direction == Vector2.ZERO:
-		current_speed = lerp(current_speed, 0.0, 0.35)
-		velocity = velocity.normalized() * current_speed
-		velocity = velocity.normalized() * current_speed
-	
-			
-	else:
-		last_direction = direction
-		current_speed =  lerp(current_speed, max_speed, 0.3)
-		velocity = direction.normalized() * current_speed
 	
 	
 func set_ui_color(color):
@@ -212,9 +197,34 @@ func update_ui():
 					set_ui_color(Color.green)
 			
 
+func smooth_snap_position(new_postion, weight):
+	global_transform.origin = lerp(global_transform.origin, new_postion, weight)
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	if is_selected:
 		get_input()
+		if target_position:
+			direction = Vector2.ZERO
+			current_speed =  lerp(current_speed, max_speed * 2, 0.8)
+			var target_direction = global_transform.origin.direction_to(target_position).normalized()
+			var target_distance = floor(global_transform.origin.distance_to(target_position))  / 10
+			if target_distance < 1.0:
+				target_position = null
+				return
+				
+			velocity = target_direction * current_speed
+		if direction == Vector2.ZERO:
+			current_speed = lerp(current_speed, 0.0, 0.35)
+			velocity = velocity.normalized() * current_speed
+			velocity = velocity.normalized() * current_speed
+		
+			if is_editing and snap_position:
+				smooth_snap_position(snap_position, delta * speed * 0.08 )
+
+		else:
+			last_direction = direction
+			current_speed =  lerp(current_speed, max_speed, 0.3)
+			velocity = direction.normalized() * current_speed
+
 		velocity = move_and_slide(velocity)
 		update_ui()
