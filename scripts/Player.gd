@@ -127,32 +127,35 @@ func get_input():
 		velocity = direction.normalized() * current_speed
 	
 	
+func set_ui_color(color):
+	modulate = color
+	line_connection.modulate = color
+
+func update_tooltip_text(new_text):
+	$Tooltip.text = new_text 
+	$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
+
+func update_ui():
+	if interactive_state == INTERACTIVE_STATES.ACTIVE:
+		set_ui_color(Color.white)
+	if interactive_state == INTERACTIVE_STATES.INACTIVE:
+		glitch_chance = get_glitch_chance()
+		if glitch_chance >= 5:
+			update_tooltip_text(current_action + " + GLITCH " + str(glitch_chance) + "%") 
+		else:
+			update_tooltip_text(current_action) 
+		if overlapping_bodies > 0:
+			set_ui_color(Color.red)
+			update_tooltip_text("LOCKED")
+			
+		elif glitch_chance > 0:
+			set_ui_color(Color.orange)
+		else:
+			set_ui_color(Color.cyan)
+
 
 func _physics_process(_delta):
 	get_input()
 	velocity = move_and_slide(velocity)
 	
-	if interactive_state == INTERACTIVE_STATES.ACTIVE:
-		modulate = Color.white
-
-	if interactive_state == INTERACTIVE_STATES.INACTIVE:
-		glitch_chance = get_glitch_chance()
-		if glitch_chance >= 5:
-			$Tooltip.text = current_action + " + GLITCH " + str(glitch_chance) + "%" 
-		else:
-			$Tooltip.text = current_action 
-			
-		if overlapping_bodies > 0:
-			modulate = Color.red
-			line_connection.modulate = Color.red
-			$Tooltip.text = "LOCKED"
-		elif glitch_chance > 0:
-			modulate = Color.orange
-			line_connection.modulate = Color.orange
-		else:
-			modulate = Color.cyan
-			line_connection.modulate = Color.cyan
-	else:
-		$Sprite.modulate = Color.white
-		line_connection.modulate = Color.white
-
+	update_ui()
