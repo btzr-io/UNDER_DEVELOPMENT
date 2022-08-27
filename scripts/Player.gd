@@ -15,12 +15,14 @@ var current_speed = 0
 var target_position = null
 var last_clone_instance = null
 var last_clone_position = null
-
+var last_tooltip_text = ""
 
 var ACTIONS = {
 	MOVE = "MOVE",
 	HIDE = "HIDE",
 	HACK = "HACK",
+	# No actions allowed
+	LOCKED = "LOCKED",
 }
 
 var glitch_chance = 0
@@ -31,6 +33,7 @@ const INTERACTIVE_STATES = {
 	ACTIVE =  0,
 	INACTIVE = 1,
 }
+
 
 var interactive_state = INTERACTIVE_STATES.ACTIVE
 var overlapping_bodies = 0
@@ -109,7 +112,6 @@ func get_input():
 			var target_distance = floor(global_transform.origin.distance_to(target_position))  / 10
 			if target_distance < 1.0:
 				target_position = null
-				print("ok")
 				return
 				
 			velocity = target_direction * current_speed
@@ -132,6 +134,12 @@ func set_ui_color(color):
 	line_connection.modulate = color
 
 func update_tooltip_text(new_text):
+	if last_tooltip_text != new_text:
+		last_tooltip_text = new_text
+	else:
+		$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
+		return
+		
 	$Tooltip.text = new_text 
 	$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
 
@@ -146,12 +154,13 @@ func update_ui():
 			update_tooltip_text(current_action) 
 		if overlapping_bodies > 0:
 			set_ui_color(Color.red)
-			update_tooltip_text("LOCKED")
-			
-		elif glitch_chance > 0:
-			set_ui_color(Color.orange)
+			update_tooltip_text(ACTIONS.LOCKED)
 		else:
-			set_ui_color(Color.cyan)
+			current_action = ACTIONS.MOVE
+			if glitch_chance > 0:
+				set_ui_color(Color.orange)
+			else:
+				set_ui_color(Color.cyan)
 
 
 func _physics_process(_delta):

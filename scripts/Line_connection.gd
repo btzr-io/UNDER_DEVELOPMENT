@@ -54,4 +54,4 @@ func _physics_process(_delta):
 		set_point_position(0, start_position)
 		set_point_position(get_point_count() - 1, target.global_transform.origin)
 	elif get_point_count() > 0:
-		remove_point(0)
+		points = []
