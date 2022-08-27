@@ -5,7 +5,7 @@ extends Label
 # var a = 2
 # var b = "text"
 
-onready var camera = get_tree().root.get_node("Level/Player/Camera2D")
+onready var camera = get_tree().root.get_node("Level/Main_camera")
 
 func _physics_process(delta):
 	var pos = camera.global_transform.origin

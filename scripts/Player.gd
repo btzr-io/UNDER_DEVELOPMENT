@@ -4,13 +4,12 @@ extends KinematicBody2D
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-var clone_instance = load("res://scenes/actors/PlayerClone.tscn")
 
 var speed = 200
 var max_speed = speed * 2.25
 var velocity = Vector2.ZERO
 var direction = Vector2.ZERO
-var last_direction = Vector2.ZERO
+var last_direction = Vector2.UP
 var current_speed = 0
 var target_position = null
 var last_clone_instance = null
@@ -19,10 +18,10 @@ var last_tooltip_text = ""
 
 var ACTIONS = {
 	MOVE = "MOVE",
-	HIDE = "HIDE",
-	HACK = "HACK",
+	EDIT = "EDIT",
 	# No actions allowed
 	LOCKED = "LOCKED",
+	ERROR = "ERROR"
 }
 var overlapping_bodies = 0
 
@@ -37,34 +36,54 @@ const INTERACTIVE_STATES = {
 	INACTIVE = 1,
 }
 
+export var is_selected = true
+var selected_target = null
 
 var is_editing = false
-
 var interactive_state = INTERACTIVE_STATES.ACTIVE
 
 
 onready var line_connection = get_node("Line_connection")
-
 onready var level = get_tree().current_scene
+onready var camera = get_tree().root.get_node("Level/Main_camera")
 
+func is_overlaping():
+	return overlapping_bodies > 0
 
 func _ready():
 	$Ovelrap.connect("body_exited", self, "handle_body_exit")
 	$Ovelrap.connect("body_entered", self, "handle_body_enter")
 	$Tooltip/AnimationPlayer.connect("animation_finished", self, "handle_animation_finish")
+	
+	if not is_selected:
+		interactive_state = INTERACTIVE_STATES.ACTIVE
+		$Sprite.frame = interactive_state
+		z_index = 1
 
 func handle_animation_finish(animation_name):
 	if animation_name == "show":
 		is_editing = $Tooltip/AnimationPlayer.current_animation_position > 0
 			
 func exit_edit_mode():
+	if is_overlaping():
+		return
+		
+	if selected_target:
+		line_connection.disconnect_target()
+		selected_target.is_selected = true
+		selected_target.enter_edit_mode()
+		is_selected = false
+		queue_free()
+		return
+	
 	if is_instance_valid(last_clone_instance):
 		interactive_state = INTERACTIVE_STATES.ACTIVE
 		$Sprite.frame = interactive_state
 		instance_clone()
 		line_connection.disconnect_target()
-		$Camera2D.add_trauma(0.4)
+		camera.add_trauma(0.4)
 		$Tooltip/AnimationPlayer.play_backwards("show")
+		$CollisionShape2D.disabled = false
 
 func enter_edit_mode():
 	if not target_position and !is_instance_valid(last_clone_instance):
@@ -76,6 +95,7 @@ func enter_edit_mode():
 		target_position = global_transform.origin + last_direction * size.x
 		instance_clone()
 		$Tooltip/AnimationPlayer.play("show")
+		$CollisionShape2D.disabled = true
 			
 func get_glitch_chance():
 	var distance = clamp(line_connection.target_distance, 1, max_glitch_range)
@@ -87,16 +107,30 @@ func get_glitch_chance():
 	return clamp(chance, 0, 100)
 	
 func handle_body_enter(overlaping_body):
-	overlapping_bodies += 1
+	if overlaping_body == self:
+		return
+	if overlaping_body.is_in_group("EDITABLE") and last_clone_instance != overlaping_body:
+		selected_target = overlaping_body
+		current_action = ACTIONS.EDIT
+	else:
+		overlapping_bodies += 1
 
 func handle_body_exit(overlaping_body):
-	overlapping_bodies -= 1
+	if overlaping_body == self:
+		return
+	if overlaping_body.is_in_group("EDITABLE") and last_clone_instance != overlaping_body:
+		if overlaping_body == selected_target:
+			selected_target = null
+			current_action = ACTIONS.MOVE
+	else:
+		overlapping_bodies -= 1
 
 func instance_clone():
 	if is_instance_valid(last_clone_instance):
 		last_clone_instance.queue_free()
 	else:
-		last_clone_instance = clone_instance.instance()	
+		last_clone_instance = duplicate(DUPLICATE_USE_INSTANCING)
+		last_clone_instance.is_selected = false	
 		level.add_child(last_clone_instance)
 		last_clone_instance.global_transform.origin = global_transform.origin
 		last_clone_position = global_transform.origin
@@ -159,10 +193,10 @@ func update_tooltip_text(new_text):
 		
 
 func update_ui():
-	if not is_editing:
+	if not is_editing and interactive_state == INTERACTIVE_STATES.ACTIVE:
 		set_ui_color(Color.white)
 		
-	if is_editing:
+	if is_editing and interactive_state == INTERACTIVE_STATES.INACTIVE:
 		if overlapping_bodies > 0:
 			set_ui_color(Color.red)
 			update_tooltip_text(ACTIONS.LOCKED)
@@ -174,10 +208,13 @@ func update_ui():
 			else:
 				set_ui_color(Color.cyan)
 				update_tooltip_text(current_action) 
+				if selected_target:
+					set_ui_color(Color.green)
+			
 
 
 func _physics_process(_delta):
-	get_input()
-	velocity = move_and_slide(velocity)
-	
-	update_ui()
+	if is_selected:
+		get_input()
+		velocity = move_and_slide(velocity)
+		update_ui()
