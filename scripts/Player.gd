@@ -24,6 +24,7 @@ var ACTIONS = {
 	# No actions allowed
 	LOCKED = "LOCKED",
 }
+var overlapping_bodies = 0
 
 var glitch_chance = 0
 var max_glitch_range = 50
@@ -37,10 +38,10 @@ const INTERACTIVE_STATES = {
 }
 
 
-
+var is_editing = false
 
 var interactive_state = INTERACTIVE_STATES.ACTIVE
-var overlapping_bodies = 0
+
 
 onready var line_connection = get_node("Line_connection")
 
@@ -50,7 +51,32 @@ onready var level = get_tree().current_scene
 func _ready():
 	$Ovelrap.connect("body_exited", self, "handle_body_exit")
 	$Ovelrap.connect("body_entered", self, "handle_body_enter")
+	$Tooltip/AnimationPlayer.connect("animation_finished", self, "handle_animation_finish")
 
+func handle_animation_finish(animation_name):
+	if animation_name == "show":
+		is_editing = $Tooltip/AnimationPlayer.current_animation_position > 0
+			
+func exit_edit_mode():
+	if is_instance_valid(last_clone_instance):
+		interactive_state = INTERACTIVE_STATES.ACTIVE
+		$Sprite.frame = interactive_state
+		instance_clone()
+		line_connection.disconnect_target()
+		$Camera2D.add_trauma(0.4)
+		$Tooltip/AnimationPlayer.play_backwards("show")
+
+func enter_edit_mode():
+	if not target_position and !is_instance_valid(last_clone_instance):
+		interactive_state = INTERACTIVE_STATES.INACTIVE
+		$Sprite.frame = interactive_state
+		line_connection.connect_target(self)
+		var size = $Sprite.frames.get_frame("idle", 0).get_size()
+		current_speed = max_speed
+		target_position = global_transform.origin + last_direction * size.x
+		instance_clone()
+		$Tooltip/AnimationPlayer.play("show")
+			
 func get_glitch_chance():
 	var distance = clamp(line_connection.target_distance, 1, max_glitch_range)
 	var chance =   max_glitch_range * distance / 140
@@ -89,25 +115,10 @@ func get_input():
 		direction.y -= 1
 	
 	if Input.is_action_just_pressed("ui_accept"):
-		if not target_position and is_instance_valid(last_clone_instance):
-			interactive_state = INTERACTIVE_STATES.ACTIVE
-			instance_clone()
-			line_connection.disconnect_target()
-			$Sprite.frame = interactive_state
-			$Camera2D.add_trauma(0.4)
-			$Tooltip.hide()
-	
-			return
-		
-		if not target_position and !is_instance_valid(last_clone_instance):
-			interactive_state = INTERACTIVE_STATES.INACTIVE
-			line_connection.connect_target(self)
-			$Sprite.frame = interactive_state
-			var size = $Sprite.frames.get_frame("idle", interactive_state).get_size()
-			current_speed = max_speed
-			target_position = global_transform.origin + last_direction * size.x
-			instance_clone()
-			$Tooltip/AnimationPlayer.play("show")
+		if not is_editing:
+			enter_edit_mode()
+		elif is_editing:
+			exit_edit_mode()
 	
 	if target_position:
 			direction = Vector2.ZERO
@@ -148,10 +159,10 @@ func update_tooltip_text(new_text):
 		
 
 func update_ui():
-	if interactive_state == INTERACTIVE_STATES.ACTIVE:
+	if not is_editing:
 		set_ui_color(Color.white)
-	if interactive_state == INTERACTIVE_STATES.INACTIVE:
 		
+	if is_editing:
 		if overlapping_bodies > 0:
 			set_ui_color(Color.red)
 			update_tooltip_text(ACTIONS.LOCKED)
