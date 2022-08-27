@@ -27,12 +27,16 @@ var ACTIONS = {
 
 var glitch_chance = 0
 var max_glitch_range = 50
+var min_glitch_chance = 5
+
 var current_action = ACTIONS.MOVE
 
 const INTERACTIVE_STATES = {
 	ACTIVE =  0,
 	INACTIVE = 1,
 }
+
+
 
 
 var interactive_state = INTERACTIVE_STATES.ACTIVE
@@ -49,10 +53,10 @@ func _ready():
 
 func get_glitch_chance():
 	var distance = clamp(line_connection.target_distance, 1, max_glitch_range)
-	var chance =   max_glitch_range * distance / 100
-	if chance > 5:
-		chance = pow(int(chance / 1.8), 2)
-	if chance < 5:
+	var chance =   max_glitch_range * distance / 140
+	if chance > min_glitch_chance:
+		chance = pow(int(chance / 1.6), 2)
+	if chance < min_glitch_chance:
 		chance = 0
 	return clamp(chance, 0, 100)
 	
@@ -130,37 +134,35 @@ func get_input():
 	
 	
 func set_ui_color(color):
-	modulate = color
-	line_connection.modulate = color
+	if modulate != color:
+		modulate = color
+		line_connection.modulate = color
 
 func update_tooltip_text(new_text):
 	if last_tooltip_text != new_text:
 		last_tooltip_text = new_text
+		$Tooltip.text = last_tooltip_text 
+		$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
 	else:
 		$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
-		return
 		
-	$Tooltip.text = new_text 
-	$Tooltip.rect_size = $Tooltip.get_font("font").get_string_size($Tooltip.text)
 
 func update_ui():
 	if interactive_state == INTERACTIVE_STATES.ACTIVE:
 		set_ui_color(Color.white)
 	if interactive_state == INTERACTIVE_STATES.INACTIVE:
-		glitch_chance = get_glitch_chance()
-		if glitch_chance >= 5:
-			update_tooltip_text(current_action + " + GLITCH " + str(glitch_chance) + "%") 
-		else:
-			update_tooltip_text(current_action) 
+		
 		if overlapping_bodies > 0:
 			set_ui_color(Color.red)
 			update_tooltip_text(ACTIONS.LOCKED)
 		else:
-			current_action = ACTIONS.MOVE
-			if glitch_chance > 0:
+			glitch_chance = get_glitch_chance()
+			if glitch_chance >= min_glitch_chance:
+				update_tooltip_text(current_action + " + GLITCH " + str(glitch_chance) + "%")
 				set_ui_color(Color.orange)
 			else:
 				set_ui_color(Color.cyan)
+				update_tooltip_text(current_action) 
 
 
 func _physics_process(_delta):
