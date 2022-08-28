@@ -44,9 +44,10 @@ var is_editing = false
 var interactive_state = INTERACTIVE_STATES.ACTIVE
 
 
-onready var line_connection = get_node("Line_connection")
+
 onready var level = get_tree().current_scene
-onready var camera = get_tree().root.get_node("Level/Main_camera")
+onready var camera = level.get_node_or_null("Main_camera")
+onready var line_connection = get_node("Line_connection")
 
 
 func is_overlaping():
@@ -54,6 +55,16 @@ func is_overlaping():
 
 func snap_to_position(new_position):
 	snap_position = new_position
+
+func show_tooltip():
+	if not $Tooltip.visible:
+		var tooltip_direction = last_direction.y
+		if tooltip_direction  <= 0:
+			$Tooltip.rect_position.y = -72
+		if tooltip_direction > 0:
+			$Tooltip.rect_position.y = 40
+		$Tooltip/AnimationPlayer.play("show")
+		print(last_direction)
 
 func _ready():
 	$Ovelrap.connect("body_exited", self, "handle_body_exit")
@@ -76,17 +87,19 @@ func exit_edit_mode():
 	if selected_target:
 		line_connection.disconnect_target()
 		selected_target.is_selected = true
+		selected_target.last_direction = last_direction
 		selected_target.enter_edit_mode()
 		is_selected = false
 		queue_free()
 		return
 	
-	if is_instance_valid(last_clone_instance):
+	if current_action == ACTIONS.MOVE and is_instance_valid(last_clone_instance):
 		interactive_state = INTERACTIVE_STATES.ACTIVE
 		$Sprite.frame = interactive_state
 		instance_clone()
 		line_connection.disconnect_target()
-		camera.add_trauma(0.4)
+		if camera:
+			camera.add_trauma(0.4)
 		$Tooltip.hide()
 		$CollisionShape2D.disabled = false
 		is_editing = false
@@ -100,8 +113,9 @@ func enter_edit_mode():
 		current_speed = max_speed
 		target_position = global_transform.origin + last_direction * size.x
 		instance_clone()
-		$Tooltip/AnimationPlayer.play("show")
 		$CollisionShape2D.disabled = true
+		show_tooltip()
+
 			
 func get_glitch_chance():
 	var distance = clamp(line_connection.target_distance, 1, max_glitch_range)
@@ -180,7 +194,7 @@ func update_tooltip_text(new_text):
 func update_ui():
 	if not is_editing and interactive_state == INTERACTIVE_STATES.ACTIVE:
 		set_ui_color(Color.white)
-		
+			
 	if is_editing and interactive_state == INTERACTIVE_STATES.INACTIVE:
 		if overlapping_bodies > 0:
 			set_ui_color(Color.red)
@@ -220,7 +234,6 @@ func _physics_process(delta):
 		
 			if is_editing and snap_position:
 				smooth_snap_position(snap_position, delta * speed * 0.08 )
-
 		else:
 			last_direction = direction
 			current_speed =  lerp(current_speed, max_speed, 0.3)

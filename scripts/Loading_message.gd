@@ -1,6 +1,7 @@
 extends Label
 
 
+# Fake messages
 const MESSAGES = [
 	"Loading textures",
 	"Ignoring bugs",

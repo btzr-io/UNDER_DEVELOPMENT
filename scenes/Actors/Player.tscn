@@ -38,7 +38,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ true ]
+"values": [ false ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath(".:self_modulate")
@@ -52,23 +52,11 @@ tracks/1/keys = {
 "update": 0,
 "values": [ Color( 1, 1, 1, 0 ) ]
 }
-tracks/2/type = "value"
-tracks/2/path = NodePath(".:rect_position")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ Vector2( -32, -80 ) ]
-}
 
 [sub_resource type="Animation" id=10]
 resource_name = "show"
 length = 0.2
-step = 0.05
+step = 0.01
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:visible")
 tracks/0/interp = 1
@@ -76,10 +64,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 0.15, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "update": 1,
-"values": [ true, true ]
+"values": [ false, true, true ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath(".:self_modulate")
@@ -92,18 +80,6 @@ tracks/1/keys = {
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
-}
-tracks/2/type = "value"
-tracks/2/path = NodePath(".:rect_position")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/keys = {
-"times": PoolRealArray( 0, 0.2 ),
-"transitions": PoolRealArray( 1, 1 ),
-"update": 0,
-"values": [ Vector2( -32, -32 ), Vector2( -32, -80 ) ]
 }
 
 [sub_resource type="RectangleShape2D" id=2]
@@ -132,11 +108,12 @@ collision_mask = 2
 script = ExtResource( 2 )
 
 [node name="Tooltip" type="Label" parent="."]
+visible = false
 self_modulate = Color( 1, 1, 1, 0 )
 margin_left = -32.0
-margin_top = -80.0
+margin_top = -72.0
 margin_right = 32.0
-margin_bottom = -47.0
+margin_bottom = -40.0
 rect_min_size = Vector2( 64, 0 )
 size_flags_horizontal = 2
 size_flags_vertical = 2
