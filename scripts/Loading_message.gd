@@ -3,8 +3,9 @@ extends Label
 
 # Fake messages
 const MESSAGES = [
-	"Loading textures",
-	"Ignoring bugs",
+	"Writing unhelpful messages",
+	"Ignoring errors",
+	"Creating memory leaks",
 	"Blocking updates",
 	"Generating project data",
 	"Connecting external services",
@@ -25,13 +26,13 @@ const MESSAGES = [
 	"Updating privacy police",
 	"Creating git conflicts",
 	"Downloading large database",
+	"Enabling mircro transactions",
 ]
 
 var messages_list = MESSAGES.duplicate()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	randomize()
 	$Timer.connect("timeout", self, "handle_timeout")
 	$Timer.start(0.8)
 

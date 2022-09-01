@@ -4,7 +4,7 @@
 
 [node name="Main_camera" type="Camera2D"]
 current = true
-zoom = Vector2( 0.75, 0.75 )
+zoom = Vector2( 0.64, 0.64 )
 process_mode = 0
 drag_margin_h_enabled = true
 drag_margin_v_enabled = true
