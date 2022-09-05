@@ -1,10 +1,62 @@
-extends Node
+class_name Utils
 
-func remove_all_children(target_parent):
+enum EDGE { LEFT = -1, RIGHT = 1, TOP = -1, BOTTOM = 1, FAR = -1, NEAR = 1 }
+
+static func get_edge_position(target, direction_x = EDGE.LEFT, direction_y = EDGE.TOP ):
+	var edge = target.global_position
+	var half_size = target.get_current_size() / 2
+	edge.x += half_size.x * direction_x 
+	edge.y += half_size.y * direction_y
+	return edge
+
+static func compare_edge(target, edge, distance = EDGE.NEAR):
+	var result = edge
+	var next_edge = edge
+	var target_edge = get_edge_position(target, EDGE.LEFT, EDGE.TOP)
+	var replace_edge = target_edge
+	if distance == EDGE.FAR:
+		target_edge = edge
+		next_edge = get_edge_position(target, EDGE.RIGHT, EDGE.BOTTOM)
+		replace_edge = next_edge
+		
+	if target_edge.x < next_edge.x:
+		result.x = replace_edge.x
+	if target_edge.y < next_edge.y:
+		result.y = replace_edge.y
+	
+	return result
+
+static func get_area_bounds(targets):
+	var bounds = Rect2(Vector2.ZERO, Vector2.ZERO)
+	if not targets or not targets.size():
+		return bounds
+		
+	var far = get_edge_position(targets[0], EDGE.RIGHT, EDGE.BOTTOM)
+	var near = get_edge_position(targets[0], EDGE.LEFT, EDGE.TOP)
+
+	var targets_size = targets.size()
+	var last_index = targets_size
+	
+	
+	
+	for target_index in targets_size:
+		if target_index < last_index:
+			var current = targets[target_index]
+			far = compare_edge(current, far, EDGE.FAR)
+			near = compare_edge(current, near, EDGE.NEAR)
+	
+	bounds.size.x = far.x - near.x
+	bounds.size.y = far.y - near.y
+	bounds.position.x = near.x + bounds.get_center().x
+	bounds.position.y = near.y + bounds.get_center().y
+	
+	return bounds
+	
+static func remove_all_children(target_parent):
 	for child in target_parent.get_children():
 		child.queue_free()
 
-func get_screen_position(target):
+static func get_screen_position(target):
 	return target.get_global_transform_with_canvas().origin
 	
 class Connection_manager:
@@ -107,15 +159,7 @@ class History_manager:
 		var action_data = history[pointer]["EXECUTE_DATA"]
 		emit_signal("history_change", action_data)
 
-		
-class Entity_State:
-	var is_editing = false
-	var is_selected = false
-	
-	func reset():
-		is_editing = false
-		is_selected = false
-		
+
 class Error_simulator:
 	var error_risk = 0
 	var min_glitch_risk = 5
@@ -129,7 +173,7 @@ class Error_simulator:
 		
 	func update_error_risk(target_distance):
 		var distance = clamp(target_distance, 1, max_glitch_range)
-		var risk =   max_glitch_range * distance / 140
+		var risk =   max_glitch_range * distance / 500 # 140
 		if risk > min_glitch_risk:
 			risk = pow(int(risk / 1.6), 2)
 		if risk < min_glitch_risk:

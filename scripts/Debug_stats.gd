@@ -1,6 +1,6 @@
 extends Label
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	var mode = " • " + (CONSTANTS.VIEWS.DEBUG if LM.edit_mode else CONSTANTS.VIEWS.RUNTIME)
 	if LM.camera:
 		var pos = LM.camera.global_transform.origin

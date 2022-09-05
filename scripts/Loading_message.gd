@@ -35,7 +35,6 @@ var messages_list = MESSAGES.duplicate()
 func _ready():
 	$Timer.connect("timeout", self, "handle_timeout")
 	$Timer.start(0.8)
-
 func handle_timeout():
 	if messages_list.empty():
 		messages_list = MESSAGES.duplicate()

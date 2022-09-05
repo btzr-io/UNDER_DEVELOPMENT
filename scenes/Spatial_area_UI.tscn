@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://scripts/UI/Spatial_area_UI.gd" type="Script" id=1]
+[ext_resource path="res://assets/themes/Debug_flat.tres" type="StyleBox" id=2]
+[ext_resource path="res://assets/themes/Debug_bounds_outline.tres" type="StyleBox" id=3]
+[ext_resource path="res://assets/themes/Debug_bounds.tres" type="StyleBox" id=4]
+
+[node name="Spatial_area_UI" type="Node2D"]
+visible = false
+show_behind_parent = true
+script = ExtResource( 1 )
+default_style = ExtResource( 4 )
+outline_style = ExtResource( 3 )
+flat_style = ExtResource( 2 )
+
+[node name="Shape" type="PanelContainer" parent="."]
+margin_right = 12.0
+margin_bottom = 12.0
+rect_clip_content = true

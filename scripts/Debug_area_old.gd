@@ -172,10 +172,11 @@ func get_input():
 	direction.y =  Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 
 func _process(_delta):
-	update_ui()
-
+		update_ui()
+		
 func _physics_process(delta):
 	get_input()
+
 	if direction != Vector2.ZERO:
 		last_direction = direction
 	
