@@ -24,9 +24,13 @@ func _ready():
 	state.is_selected = auto_select
 	if auto_select:
 		state.is_selected = auto_select
-		LM.select_entity(self)
+		DM.select_entity(self)
 	
-	LM.level.get_node("Debug_ui").call_deferred("add_child", debug_bounds)
+	DM.level.get_node("Debug_ui").call_deferred("add_child", debug_bounds)
+	
+func load_state(new_state):
+	state = new_state
+	global_position = state.global_position
 
 func has_connection(test_connection_origin):
 	return input_connections.has(test_connection_origin)
@@ -46,10 +50,10 @@ func get_current_size():
 
 
 func _process(_delta):
-	if LM.edit_mode and state.is_multiselected:
+	if DM.state.edit_mode and state.is_multiselected:
 		debug_bounds.set_world_position(global_position)
 		debug_bounds.resize(get_current_size())
-		debug_bounds.modulate = LM.debug_area.modulate
+		debug_bounds.modulate = DM.debug_area.modulate
 		if not debug_bounds.visible:
 			debug_bounds.show()
 	elif debug_bounds.visible:
@@ -57,14 +61,15 @@ func _process(_delta):
 	
 	
 
-func _physics_process(delta):
-	if not LM.edit_mode and state.is_selected:
+func _physics_process(_delta):
+	state.global_position = global_position
+	if not DM.state.edit_mode and state.is_selected:
 		# Movement axis
 		direction = Vector2.ZERO
 		direction.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 		direction.y =  Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 
-	if LM.edit_mode and direction != Vector2.ZERO:
+	if DM.state.edit_mode and direction != Vector2.ZERO:
 		direction = Vector2.ZERO
 		
 	if direction == Vector2.ZERO and current_speed > 0:

@@ -4,8 +4,7 @@ export var single_line = false
 export var max_points = 100
 
 var mapped_points = []
-
-onready var state = Debug_line_connection_state.new()
+var state = Debug_line_connection_state.new()
 
 func connect_target(new_target, new_target_origin):
 	state.emitting = true
@@ -24,7 +23,7 @@ func _ready():
 			var new_point = Position2D.new()
 			new_point.name = get_point_name(point_index)
 			mapped_points.append(new_point)
-			LM.level.call_deferred("add_child", new_point)
+			DM.level.call_deferred("add_child", new_point)
 		
 func get_point_name(point_index):
 	 return name + "_point_" + str(point_index)
@@ -32,8 +31,8 @@ func get_point_name(point_index):
 func get_target_distance():
 	var target_screen_position =  Utils.get_screen_position(state.target)
 	var target_origin_screen_position = Utils.get_screen_position(state.target_origin)
-	var distance = target_screen_position.distance_to(target_origin_screen_position) * 0.05 
-	distance =  int(distance * LM.camera.zoom.x)
+	var distance = target_screen_position.distance_to(target_origin_screen_position) * 0.05
+	distance =  int(distance * DM.camera.zoom.x)
 	state.target_distance  = distance
 	# distance = clamp(28 - distance, 12, 28)
 	distance = clamp(max_points - distance, 12, max_points)

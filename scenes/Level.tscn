@@ -45,7 +45,7 @@ __meta__ = {
 
 [node name="Main_camera" parent="." instance=ExtResource( 4 )]
 position = Vector2( 776, 392 )
-zoom = Vector2( 0.9, 0.9 )
+zoom = Vector2( 1, 1 )
 limit_left = -500
 limit_top = -500
 limit_right = 2500
@@ -103,5 +103,5 @@ script = ExtResource( 5 )
 z_index = 2
 z_as_relative = false
 
-[node name="Debug_area_connection" parent="Debug_ui" instance=ExtResource( 7 )]
+[node name="Debug_trail" parent="Debug_ui" instance=ExtResource( 7 )]
 z_index = 1

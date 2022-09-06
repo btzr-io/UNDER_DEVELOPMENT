@@ -25,9 +25,9 @@ func _old_render_connections(target_parent, connections):
 		var new_connection = line_connection_scene.instance()
 		new_connection.single_line = true
 		new_connection.modulate.a = 0.5
-		new_connection.connect_target(LM.selected_entity, connection_origin)
+		new_connection.connect_target(DM.selected_entity, connection_origin)
 		target_parent.call_deferred("add_child", new_connection)
 
 
 func render_input_connections():
-	render_connections($Input, LM.selected_entity )
+	render_connections($Input, DM.state.selected_entity )

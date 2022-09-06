@@ -115,19 +115,20 @@ class Connection_manager:
 class History_manager:
 	var history = []
 	var pointer = -1
-	var max_size = 5
+	var max_size = 3
 	var has_undo = false
 	var has_redo = false
 	var action_after_undo = false
 	signal history_change
 		
-	func _init(new_max_size = 5):
-		max_size = new_max_size
+	func _init(new_max_size):
+		if max_size > 0:
+			max_size = new_max_size
 		
 	func clear():
-		history.clear()
 		pointer = -1
 		action_after_undo = false
+		history.clear()
 
 	func push(action_data):
 		# When the player executes an action  we append it to the list:
@@ -146,7 +147,7 @@ class History_manager:
 		if not has_undo: return
 		# When the player chooses “Undo”, we undo the current action and move the current pointer back.
 		action_after_undo = true
-		var action_data = history[pointer]["UNDO_DATA"]
+		var action_data = history[pointer]["UNDO"]
 		pointer -= 1
 		emit_signal("history_change", action_data)
 		
@@ -156,7 +157,7 @@ class History_manager:
 		if not has_redo: return
 		# When they choose “Redo”, we advance the pointer and then execute	 that action.
 		pointer += 1
-		var action_data = history[pointer]["EXECUTE_DATA"]
+		var action_data = history[pointer]["EXECUTE"]
 		emit_signal("history_change", action_data)
 
 

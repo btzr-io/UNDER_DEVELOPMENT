@@ -14,11 +14,12 @@ enum STYLES { DEFAULT, OUTLINE }
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$Shape.add_stylebox_override("panel", default_style)
-	LM.level.call_deferred("add_child", world_origin)
+	# $Shape.add_stylebox_override("panel", default_style)
+	DM.level.call_deferred("add_child", world_origin)
 
 
 func set_style(style=STYLES.DEFAULT):
+	return
 	if style == STYLES.DEFAULT:
 		$Shape.add_stylebox_override("panel", default_style)
 	if style == STYLES.OUTLINE:
@@ -28,7 +29,7 @@ func set_world_position(new_position):
 	world_origin.global_position = new_position
 
 func resize(new_size):
-	var zoom =   Vector2.ONE / LM.camera.zoom
+	var zoom =   Vector2.ONE / DM.camera.zoom
 	$Shape.rect_size = new_size  * zoom
 
 func update_position():

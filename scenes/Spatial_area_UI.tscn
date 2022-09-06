@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scripts/UI/Spatial_area_UI.gd" type="Script" id=1]
 [ext_resource path="res://assets/themes/Debug_flat.tres" type="StyleBox" id=2]
 [ext_resource path="res://assets/themes/Debug_bounds_outline.tres" type="StyleBox" id=3]
 [ext_resource path="res://assets/themes/Debug_bounds.tres" type="StyleBox" id=4]
+[ext_resource path="res://assets/textures/panel/outline_dashed.png" type="Texture" id=5]
 
 [node name="Spatial_area_UI" type="Node2D"]
 visible = false
@@ -13,7 +14,14 @@ default_style = ExtResource( 4 )
 outline_style = ExtResource( 3 )
 flat_style = ExtResource( 2 )
 
-[node name="Shape" type="PanelContainer" parent="."]
+[node name="Shape" type="NinePatchRect" parent="."]
 margin_right = 12.0
 margin_bottom = 12.0
 rect_clip_content = true
+texture = ExtResource( 5 )
+patch_margin_left = 21
+patch_margin_top = 21
+patch_margin_right = 21
+patch_margin_bottom = 21
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2

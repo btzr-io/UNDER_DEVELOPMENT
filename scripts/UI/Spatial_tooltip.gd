@@ -24,7 +24,7 @@ func update():
 	update_position()
 
 func update_position():
-	var zoom =   Vector2.ONE / LM.camera.zoom
+	var zoom =   Vector2.ONE / DM.camera.zoom
 	# Align to center
 	rect_position =  rect_size  / 2 * -1 
 	if tooltip_direction  <= 0:
@@ -37,6 +37,6 @@ func update_position():
 	# Aling to left
 	rect_position.x  = -target.rect_size.x / 2
 
-func _process(delta):
+func _process(_delta):
 	if target:
 		update()

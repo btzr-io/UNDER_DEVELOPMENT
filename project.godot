@@ -24,6 +24,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://scripts/states/Debug_line_connection_state.gd"
 }, {
+"base": "State",
+"class": "Debug_manager_state",
+"language": "GDScript",
+"path": "res://scripts/states/Debug_manager_state.gd"
+}, {
+"base": "State",
+"class": "Debug_multiselection_state",
+"language": "GDScript",
+"path": "res://scripts/states/Debug_multiselection_state.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Entity",
 "language": "GDScript",
@@ -43,6 +53,8 @@ _global_script_class_icons={
 "Debug_area_state": "",
 "Debug_entity_state": "",
 "Debug_line_connection_state": "",
+"Debug_manager_state": "",
+"Debug_multiselection_state": "",
 "Entity": "",
 "State": "",
 "Utils": ""
@@ -57,9 +69,9 @@ config/icon="res://icon.png"
 
 [autoload]
 
-GM="*res://scripts/globals/Game_manager.gd"
-LM="*res://scripts/globals/Level_manager.gd"
 CONSTANTS="*res://scripts/globals/Constants.gd"
+GM="*res://scripts/globals/Game_manager.gd"
+DM="*res://scripts/globals/Debug_manager.gd"
 
 [display]
 

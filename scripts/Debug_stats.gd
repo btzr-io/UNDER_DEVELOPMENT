@@ -1,9 +1,9 @@
 extends Label
 
 func _physics_process(_delta):
-	var mode = " • " + (CONSTANTS.VIEWS.DEBUG if LM.edit_mode else CONSTANTS.VIEWS.RUNTIME)
-	if LM.camera:
-		var pos = LM.camera.global_transform.origin
+	var mode = " • " + (CONSTANTS.VIEWS.DEBUG if DM.state.edit_mode else CONSTANTS.VIEWS.RUNTIME)
+	if DM.camera:
+		var pos = DM.camera.global_transform.origin
 		var pos_x = str(int(pos.x))
 		var pos_y = str(int(pos.y))
 		var position = " X: " + pos_x + " Y: " + pos_y 
